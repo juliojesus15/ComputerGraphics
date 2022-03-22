@@ -11,7 +11,7 @@ chdir x64
 
 del CMakeCache.txt
 
-cmake -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -G "Visual Studio 16 2019" -A x64 ../../../
+cmake -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -G "Visual Studio 17 2022" -A x64 ../../../
 
 if %errorlevel% NEQ 0 goto error
 goto end
