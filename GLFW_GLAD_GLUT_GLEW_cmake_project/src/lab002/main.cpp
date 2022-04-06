@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <stdlib.h>    
+#include <time.h>      
 
 #include "generador_puntos.h"
 
@@ -14,14 +16,19 @@ const unsigned int SCR_HEIGHT = 600;
 
 // Presionando la tecla A las figuras cambian de color
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-int indice = 0;
 
-float rgb[12] = {
+int color_a = 0;
+int color_b = 8;
+int color_c = 20;
+
+std::vector<float> rgb = {
     1.0f, 0.0f, 0.0f, 1.0f, // rojo
     0.0f, 1.0f, 0.0f, 1.0f, // verde 
     0.0f, 0.0f, 1.0f, 1.0f, // azul
+    1.0f, 1.0f, 0.0f, 1.0f, // amarillo
+    0.0f, 1.0f, 1.0f, 1.0f, // cyan
+    1.0f, 0.0f, 1.0f, 1.0f, // magenta
 };
-
 
 const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
@@ -53,7 +60,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Computacion Grafica (Laboratorio 001) - UCSP", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Computacion Grafica (Control) - UCSP", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -116,93 +123,42 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
 
-    //Generando puntos
-    Triangulo triangulo;
-    std::vector<float> puntos_triangulo_1 = triangulo.GenerarTriangulo(0.2f, 90, -0.5f, 0.5f, 0.0f);
-    std::vector<float> puntos_triangulo_2 = triangulo.GenerarTriangulo(0.2f, 90, 0.5f, -0.7f, 0.0f);
+    //Generando puntos (Tam, Angulo, centro: x, y, z)
+    Triangulo triangulo(0.2f, 90, -0.5f, 0.5f, 0.0f);
+    std::vector<float> puntos_triangulo = triangulo.puntos;
     
-    Estrella estrella;
-    std::vector<float> puntos_estrella = estrella.GenerarEstrella(0.2f, -0.5f, -0.5f, 0.0f);
+    //Generando puntos (Radio, centro: x, y, z)
+    Estrella estrella(0.5f, -0.5f, -0.5f, 0.0f);
+    std::vector<float> puntos_estrella = estrella.puntos;    
 
-    Pizza pizza;
-    std::vector<float> puntos_pizza = pizza.GenerarPizza(0.3f, 24, 0.5f, 0.6f, 0.0f);
-    //std::vector<float> test_indices = pizza.GenerarIndicesPizza(0.2f, 12, 0.5f, 0.0f, 0.0f);
+    //Generando puntos (Radio, slice, centro: x, y, z)
+    Pizza pizza(0.3f, 24, 0.5f, 0.6f, 0.0f);
+    std::vector<float> puntos_pizza = pizza.puntos;    
 
-    // Casa
-    Triangulo triangulo_casa;
-    std::vector<float> a = triangulo_casa.GenerarTriangulo(0.2f, 90, 0.0f, 0.1f, 0.0f);
-    std::vector<float> b = triangulo_casa.GenerarTriangulo(0.2f, 135, 0.0f, 0.0f, 0.0f);
-    std::vector<float> c = triangulo_casa.GenerarTriangulo(0.2f, 315, 0.0f, 0.0f, 0.0f);
-
-    unsigned int VBO[8], VAO[8], EBO;
-
-    glGenVertexArrays(8, VAO);
-    glGenBuffers(8, VBO);
-    glGenBuffers(1, &EBO);
+    unsigned int VBO[3], VAO[3];
+    glGenVertexArrays(3, VAO);
+    glGenBuffers(3, VBO);
     
     //Triangulo con lineas    
     glBindVertexArray(VAO[0]);
     glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * puntos_triangulo_1.size(), static_cast<void*>(puntos_triangulo_1.data()), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * puntos_triangulo.size(), static_cast<void*>(puntos_triangulo.data()), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     
-
-    //Triangulo con puntos
+    //Generar estrella
     glBindVertexArray(VAO[1]);
     glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * puntos_triangulo_2.size(), static_cast<void*>(puntos_triangulo_2.data()), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    //Generar estrella
-    glBindVertexArray(VAO[2]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * puntos_estrella.size(), static_cast<void*>(puntos_estrella.data()), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     //Generar Pizza
-    glBindVertexArray(VAO[3]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[3]);
+    glBindVertexArray(VAO[2]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * puntos_pizza.size(), static_cast<void*>(puntos_pizza.data()), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);    
-
-    //Casa - Techo
-    glBindVertexArray(VAO[4]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[4]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * a.size(), static_cast<void*>(a.data()), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    //Casa - izquierda
-    glBindVertexArray(VAO[5]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[5]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * b.size(), static_cast<void*>(b.data()), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-
-    //Casa - derecha
-    glBindVertexArray(VAO[6]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[6]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * c.size(), static_cast<void*>(c.data()), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-
-    //Generar Pizza test
-    /*
-    glBindVertexArray(VAO[7]);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO[7]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * test_indices.size(), static_cast<void*>(test_indices.data()), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float)* pizza.indices.size(), static_cast<void*>(pizza.indices.data()), GL_STATIC_DRAW);
-    */
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -215,10 +171,12 @@ int main()
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     //Aumentar el tamanho de los puntos
-    glPointSize(8);
+    glPointSize(12);
+    glLineWidth(8);
 
     // render loop
     // -----------    
+    std::cout << "Presione la tecla A para cambiar de color" << std::endl;
     while (!glfwWindowShouldClose(window))
     {
         // input
@@ -226,46 +184,52 @@ int main()
         processInput(window);
 
         // render
-        // ------
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // Triangulo con lineas
+        // ------        
+        glClearColor(0.3f, 0.2f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT
+        );
+        // Dibujando triangulos
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-        glUniform4f(vertexColorLocation, rgb[indice], rgb[indice+1], rgb[indice+2], rgb[indice+3]);
+        glUniform4f(vertexColorLocation, rgb[color_a], rgb[color_a + 1], rgb[color_a + 2], rgb[color_a + 3]);
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO[0]); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized        
-        glDrawArrays(GL_LINE_STRIP, 0, puntos_triangulo_1.size() / 3 );
 
-        // Triangulo con puntos
-        glBindVertexArray(VAO[1]);
-        glDrawArrays(GL_POINTS,0, puntos_triangulo_2.size() / 3);
+        glBindVertexArray(VAO[0]); // Triangulo
+        glDrawArrays(GL_TRIANGLES, 0, (puntos_triangulo.size() / 3) - 1);
 
-        // Triangulo con puntos
-        glBindVertexArray(VAO[2]);
+        glBindVertexArray(VAO[1]); // Estrella
+        glDrawArrays(GL_TRIANGLES, 0, puntos_estrella.size() / 3 );
+
+        glBindVertexArray(VAO[2]); // Pizza
+        glDrawArrays(GL_TRIANGLES, 0, puntos_pizza.size() / 3);
+
+        // Dibujando lineas
+        glUniform4f(vertexColorLocation, rgb[color_b], rgb[color_b + 1], rgb[color_b + 2], rgb[color_b + 3]);
+        glUseProgram(shaderProgram);
+        
+        glBindVertexArray(VAO[0]); // Triangulo
+        glDrawArrays(GL_LINE_STRIP, 0, puntos_triangulo.size() / 3);
+
+        glBindVertexArray(VAO[1]); // Estrella
         glDrawArrays(GL_LINE_STRIP, 0, puntos_estrella.size() / 3);
+        
+        glBindVertexArray(VAO[2]); // Pizza
+        glDrawArrays(GL_LINE_STRIP, 0, puntos_pizza.size() / 3);
+
+
+        // Dibujando puntos
+        glUniform4f(vertexColorLocation, rgb[color_c], rgb[color_c + 1], rgb[color_c + 2], rgb[color_c + 3]);
+        glUseProgram(shaderProgram);
+
+        glBindVertexArray(VAO[0]); // Triangulo
+        glDrawArrays(GL_POINTS, 0, (puntos_triangulo.size() / 3) - 1);
+
+        glBindVertexArray(VAO[1]); // Estrella
         glDrawArrays(GL_POINTS, 0, puntos_estrella.size() / 3);
 
-        // Triangulo con puntos
-        glBindVertexArray(VAO[3]);
-        glDrawArrays(GL_LINE_STRIP, 0, puntos_pizza.size() / 3);
-                
-        //Casa
-        glBindVertexArray(VAO[4]);
-        glDrawArrays(GL_TRIANGLES, 0, a.size() / 3);
+        glBindVertexArray(VAO[2]); // Pizza
+        glDrawArrays(GL_POINTS, 0, puntos_pizza.size() / 3);
 
-        glBindVertexArray(VAO[5]);
-        glDrawArrays(GL_TRIANGLES, 0, b.size() / 3);
-
-        glBindVertexArray(VAO[6]);
-        glDrawArrays(GL_TRIANGLES, 0, c.size() / 3);
-
-
-
-        //glBindVertexArray(VAO[7]);
-        //glDrawArrays(GL_TRIANGLES, 0, test_indices.size() / 3);
-        //glDrawElements(GL_LINE_STRIP, test_indices.size() + 1, GL_UNSIGNED_INT, 0);
-
+        
         // glBindVertexArray(0); // no need to unbind it every time 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -278,9 +242,7 @@ int main()
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, VAO);
     glDeleteBuffers(1, VBO);
-    glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
-
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
@@ -298,13 +260,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-
+    srand(time(NULL));
     if (key == GLFW_KEY_A && action == GLFW_PRESS) {
-        indice = (indice + 4) % 12;
-        std::cout << ":D" << indice << std::endl;
+        color_a = (color_a + 4) % 24;
+        color_b = (color_b + 4) % 24;
+        color_c = (color_c + 4) % 24;
     }
-
-
 }
