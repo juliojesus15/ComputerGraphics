@@ -12,6 +12,17 @@ void processInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+// Presionando la tecla A las figuras cambian de color
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+int indice = 0;
+
+float rgb[12] = {
+    1.0f, 0.0f, 0.0f, 1.0f, // rojo
+    0.0f, 1.0f, 0.0f, 1.0f, // verde 
+    0.0f, 0.0f, 1.0f, 1.0f, // azul
+};
+
+
 const char* vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
 "void main()\n"
@@ -20,9 +31,10 @@ const char* vertexShaderSource = "#version 330 core\n"
 "}\0";
 const char* fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
+"uniform vec4 ourColor;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"   FragColor = ourColor;\n"
 "}\n\0";
 
 
@@ -50,6 +62,8 @@ int main()
     }
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    glfwSetKeyCallback(window, key_callback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -125,8 +139,7 @@ int main()
     glGenVertexArrays(8, VAO);
     glGenBuffers(8, VBO);
     glGenBuffers(1, &EBO);
-
-
+    
     //Triangulo con lineas    
     glBindVertexArray(VAO[0]);
     glBindBuffer(GL_ARRAY_BUFFER, VBO[0]);
@@ -134,6 +147,7 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
     
+
     //Triangulo con puntos
     glBindVertexArray(VAO[1]);
     glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
@@ -217,6 +231,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Triangulo con lineas
+        int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        glUniform4f(vertexColorLocation, rgb[indice], rgb[indice+1], rgb[indice+2], rgb[indice+3]);
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO[0]); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized        
         glDrawArrays(GL_LINE_STRIP, 0, puntos_triangulo_1.size() / 3 );
@@ -243,6 +259,8 @@ int main()
 
         glBindVertexArray(VAO[6]);
         glDrawArrays(GL_TRIANGLES, 0, c.size() / 3);
+
+
 
         //glBindVertexArray(VAO[7]);
         //glDrawArrays(GL_TRIANGLES, 0, test_indices.size() / 3);
@@ -278,4 +296,15 @@ void processInput(GLFWwindow* window)
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
+    if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+        indice = (indice + 4) % 12;
+        std::cout << ":D" << indice << std::endl;
+    }
+
+
 }
