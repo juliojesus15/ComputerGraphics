@@ -2,6 +2,7 @@
 #add_subdirectory( Tutorial_02 )
 add_subdirectory( lab001 )
 add_subdirectory( lab002 )
+add_subdirectory( lab003 )
 
 add_subdirectory( hw0 )
 

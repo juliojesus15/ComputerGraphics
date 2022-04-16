@@ -16,6 +16,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 // Presionando la tecla A las figuras cambian de color
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mover_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 int color_a = 0;
 int color_b = 8;
