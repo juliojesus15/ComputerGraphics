@@ -4,6 +4,7 @@ add_subdirectory( lab001 )
 add_subdirectory( lab002 )
 add_subdirectory( lab003 )
 add_subdirectory( lab004 )
+add_subdirectory( lab005 )
 add_subdirectory( hw0 )
 
 
