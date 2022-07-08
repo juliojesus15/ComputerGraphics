@@ -1,1 +1,1 @@
-# Computacion Grafica - UCSP
+# Computación gráfica - UCSP
