@@ -1,6 +1,6 @@
 /*
 * Alumno: Julio Ticona Quispe
-* Curso: Computacion Grafica
+* Curso: Computacion Grafica - Parcial practico
 */
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -29,10 +29,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 Triangulo triangulo(0.2f, 90, 0.0f, 0.0f, 0.0f);
 
 //Generando puntos (Radio, centro: x, y, z)
-Estrella estrella(0.5f, -0.5f, -0.5f, 0.0f);
+Estrella estrella(0.2f, -0.8f, -0.8f, 0.0f);
 
-//Generando puntos (Radio, slice, centro: x, y, z)
-Pizza pizza(0.3f, 24, 0.5f, 0.6f, 0.0f);
+Cuadrado cuadrado(0.2f, 0.2f, 0.3f, 0.0f);
+
+Rombo rombo(0.2f, 0.6f, 0.6f, 0.0f);
+
+//Estrella animacion
+bool eje_estrella = false;
+bool orientacion_estrella = true;
+double pasos_estrella = 15;
+
+//Rombo animacion
+bool eje = false;
+bool orientacion = false;
+double pasos = 12;
 
 //Activar scala
 bool activar_escala = false;
@@ -89,7 +100,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Computacion Grafica (Lab005) - UCSP", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Computacion Grafica (PARCIAL PRACTICO) - UCSP", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -152,9 +163,9 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------    
-    unsigned int VBO[3], VAO[3];
-    glGenVertexArrays(3, VAO);
-    glGenBuffers(3, VBO);
+    unsigned int VBO[4], VAO[4];
+    glGenVertexArrays(4, VAO);
+    glGenBuffers(4, VBO);
     
     //Triangulo con lineas    
     glBindVertexArray(VAO[0]);
@@ -174,12 +185,19 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    //Generar Pizza
+    //Generar Cuadrado
     glBindVertexArray(VAO[2]);
     glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * pizza.puntos.size(), static_cast<void*>(pizza.puntos.data()), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * cuadrado.puntos.size(), static_cast<void*>(cuadrado.puntos.data()), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);    
+
+    //Generar rombo
+    glBindVertexArray(VAO[3]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO[3]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rombo.puntos.size(), static_cast<void*>(rombo.puntos.data()), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -192,28 +210,13 @@ int main()
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     //Aumentar el tamanho de los puntos
-    glPointSize(12);
-    glLineWidth(8);
+    glPointSize(8);
+    glLineWidth(3);
 
-    // render loop
-    // -----------
-    std::cout << "COLORES" << std::endl;
-    std::cout << "1) Cambiar de color: PRESS KEY P" << std::endl;
-    std::cout << "=====================================================" << std::endl;
-    std::cout << "ANIMACIONES" << std::endl;
-    std::cout << "1) Activar rotación: PRESS KEY Q" << std::endl;
-    std::cout << "2) Activar escala: PRESS KEY E" << std::endl;
-    std::cout << "=====================================================" << std::endl;
-    std::cout << "PARA MOVER UNA FIGURA PRIMERO DEBE SELECCIONAR UNA FIGURA" << std::endl;
-    std::cout << "1) Triangulo: PRESS KEY 1" << std::endl;
-    std::cout << "2) Estrella: PRESS KEY 2" << std::endl;
-    std::cout << "3) Pizza: PRESS KEY 3" << std::endl;
-    std::cout << "=====================================================" << std::endl;
-    std::cout << "CONTROLES" << std::endl;
-    std::cout << "Arriba: PRES KEY UP" << std::endl;
-    std::cout << "Abajo: PRES KEY DOWN" << std::endl;
-    std::cout << "Izquierda: PRES KEY LEFT" << std::endl;
-    std::cout << "Derecha: PRES KEY RIGHT" << std::endl;    
+    std::cout << "MENU" << std::endl;
+    std::cout << "Presiona P para cambiar el color de los vertices" << std::endl;
+    
+      
  
     while (!glfwWindowShouldClose(window))
     {
@@ -234,59 +237,172 @@ int main()
         glBufferData(GL_ARRAY_BUFFER, sizeof(float) * estrella.puntos.size(), static_cast<void*>(estrella.puntos.data()), GL_STATIC_DRAW);       
         
         glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * pizza.puntos.size(), static_cast<void*>(pizza.puntos.data()), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * cuadrado.puntos.size(), static_cast<void*>(cuadrado.puntos.data()), GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO[3]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * rombo.puntos.size(), static_cast<void*>(rombo.puntos.data()), GL_STATIC_DRAW);
 
         int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
         
         glUniform4f(vertexColorLocation, rgb[color_a], rgb[color_a + 1], rgb[color_a + 2], rgb[color_a + 3]);
         glUseProgram(shaderProgram);
         
-        if (activar_escala == true) {            
-            if (idx_figura == 1) triangulo.aplicar_scala(!escala);
-            else if (idx_figura == 2) estrella.aplicar_scala(!escala);
-            else if (idx_figura == 3) pizza.aplicar_scala(!escala);
-            //triangulo.aplicar_scala(escala);
-            escala = !escala;
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));                        
+        //Escala triangulo
+        triangulo.aplicar_scala(!escala);        
+        escala = !escala;
+        //std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        
+        //Rotacion cuadrado
+        cuadrado.aplicar_rotacion(25.0f);
+
+
+        //Traslacion rombo
+        if (eje == false && orientacion == false) {
+            rombo.aplicar_traslacion(-0.1f, 0.0f, false);
+            pasos = pasos - 1;
+            //std::cout << pasos << std::endl;
+            if (pasos == 0) {
+                eje = true;
+                orientacion = false;
+                pasos = 9;
+            }
         }
 
-        if (activar_rotacion == true) {   
-            if (idx_figura == 1) triangulo.aplicar_rotacion(45.0f);
-            else if (idx_figura == 2) estrella.aplicar_rotacion(45.0f);
-            else if (idx_figura == 3) pizza.aplicar_rotacion(45.0f);
-            //estrella.aplicar_rotacion(45.0f);
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        else if (eje == true && orientacion == false) {
+            rombo.aplicar_traslacion(0.0f, -0.1f, true);
+            pasos = pasos - 1;
+            //std::cout << pasos << std::endl;
+            if (pasos == 0) {
+                eje = false;
+                orientacion = true;
+                pasos = 12;
+            }
         }
+
+        else if (eje == false && orientacion == true) {
+            rombo.aplicar_traslacion(0.1f, 0.0f, false);
+            pasos = pasos - 1;
+            //std::cout << pasos << std::endl;
+            if (pasos == 0) {
+                eje = true;
+                orientacion = true;
+                pasos = 9;
+            }
+        }
+        else if (eje == true && orientacion == true) {
+            rombo.aplicar_traslacion(0.0f, 0.1f, true);
+            pasos = pasos - 1;
+            //std::cout << pasos << std::endl;
+            if (pasos == 0) {
+                eje = false;
+                orientacion = false;
+                pasos = 12;
+            }
+        }
+
+
+        //Animacion Estrella        
+        //estrella.aplicar_rotacion(1.0f);
+        if (eje_estrella == false && orientacion_estrella == true) {
+            estrella.aplicar_traslacion(0.1f, 0.0f, false);
+            estrella.aplicar_rotacion(90.0f);
+            pasos_estrella = pasos_estrella - 1;
+            //std::cout << pasos << std::endl;
+            if (pasos_estrella == 0) {
+                eje_estrella = true;
+                orientacion_estrella = true;
+                pasos_estrella = 15;
+            }
+        }
+
+        else if (eje_estrella == true && orientacion_estrella == true) {
+            estrella.aplicar_traslacion(0.0f, 0.1f, true);
+            estrella.aplicar_rotacion(90.0f);
+            pasos_estrella = pasos_estrella - 1;
+            //std::cout << pasos << std::endl;
+            if (pasos_estrella == 0) {
+                eje_estrella = false;
+                orientacion_estrella = false;
+                pasos_estrella = 15;
+            }
+        }
+    
+        else if (eje_estrella == false && orientacion_estrella == false) {
+            estrella.aplicar_traslacion(-0.1f, 0.0f, false);
+            estrella.aplicar_rotacion(90.0f);
+            pasos_estrella = pasos_estrella - 1;
+            //std::cout << pasos << std::endl;
+            if (pasos_estrella == 0) {
+                eje_estrella = true;
+                orientacion_estrella = false;
+                pasos_estrella = 15;
+            }
+        }
+        
+        else if (eje_estrella == true && orientacion_estrella == false) {
+            estrella.aplicar_traslacion(0.0f, -0.1f, true);
+            estrella.aplicar_rotacion(90.0f);
+            pasos_estrella = pasos_estrella - 1;
+            //std::cout << pasos << std::endl;
+            if (pasos_estrella == 0) {
+                eje_estrella = false;
+                orientacion_estrella = true;
+                pasos_estrella = 12;
+            }
+        }
+        
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
                
+        glUniform4f(vertexColorLocation,255.0f/ 255.0f,0.0f, 0.0f, 0.0f);
+        glUseProgram(shaderProgram);
         glBindVertexArray(VAO[0]); // Triangulo
         glDrawArrays(GL_TRIANGLES, 0, (triangulo.puntos.size() / 3) - 1);
+
+        glUniform4f(vertexColorLocation, 255.0f / 255.0f, 204.0f / 255.0f, 102.0f / 255.0f, 0.0f);
+        glUseProgram(shaderProgram);
         glBindVertexArray(VAO[1]); // Estrella
         glDrawArrays(GL_TRIANGLES, 0, estrella.puntos.size() / 3 );
-        glBindVertexArray(VAO[2]); // Pizza
-        glDrawArrays(GL_TRIANGLES, 0, pizza.puntos.size() / 3);
+
+        glUniform4f(vertexColorLocation, 146.0f / 255.0f, 208.0f / 255.0f, 80.0f / 255.0f, 0.0f);
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO[2]); // Cuadrado
+        glDrawArrays(GL_TRIANGLES, 0, cuadrado.puntos.size() / 3);
+
+        glUniform4f(vertexColorLocation, 0.0f, 51.0f / 255.0f, 204.0f / 255.0f, 0.0f);
+        glUseProgram(shaderProgram);
+        glBindVertexArray(VAO[3]); // Rombo
+        glDrawArrays(GL_TRIANGLES, 0, rombo.puntos.size() / 3);
+        
 
         // Dibujando lineas
-        glUniform4f(vertexColorLocation, rgb[color_b], rgb[color_b + 1], rgb[color_b + 2], rgb[color_b + 3]);
+        glUniform4f(vertexColorLocation, 1.0f, 1.0f, 1.0f, 0.0f);
         glUseProgram(shaderProgram);
         
         glBindVertexArray(VAO[0]); // Triangulo
         glDrawArrays(GL_LINE_STRIP, 0, triangulo.puntos.size() / 3);
         glBindVertexArray(VAO[1]); // Estrella
         glDrawArrays(GL_LINE_STRIP, 0, estrella.puntos.size() / 3);        
-        glBindVertexArray(VAO[2]); // Pizza
-        glDrawArrays(GL_LINE_STRIP, 0, pizza.puntos.size() / 3);
+        glBindVertexArray(VAO[2]); // Cuadrado
+        glDrawArrays(GL_LINE_STRIP, 0, cuadrado.puntos.size() / 3);
+        glBindVertexArray(VAO[3]); // Cuadrado
+        glDrawArrays(GL_LINE_STRIP, 0, rombo.puntos.size() / 3);
+        
 
         // Dibujando puntos
         glUniform4f(vertexColorLocation, rgb[color_c], rgb[color_c + 1], rgb[color_c + 2], rgb[color_c + 3]);
-        glUseProgram(shaderProgram);
-        
+        glUseProgram(shaderProgram);        
 
         glBindVertexArray(VAO[0]); // Triangulo
         glDrawArrays(GL_POINTS, 0, (triangulo.puntos.size() / 3) - 1);
         glBindVertexArray(VAO[1]); // Estrella
         glDrawArrays(GL_POINTS, 0, estrella.puntos.size() / 3);
-        glBindVertexArray(VAO[2]); // Pizza
-        glDrawArrays(GL_POINTS, 0, pizza.puntos.size() / 3);
+        glBindVertexArray(VAO[2]); // Cuadrado
+        glDrawArrays(GL_POINTS, 0, cuadrado.puntos.size() / 3);
+        glBindVertexArray(VAO[3]); // Rombo
+        glDrawArrays(GL_POINTS, 0, rombo.puntos.size() / 3);
+        
         
         // glBindVertexArray(0); // no need to unbind it every time 
 
@@ -323,32 +439,5 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         color_a = (color_a + 4) % 24;
         color_b = (color_b + 4) % 24;
         color_c = (color_c + 4) % 24;
-    }
-
-    //Elegir una figura
-    else if (key == GLFW_KEY_1 && action == GLFW_PRESS) idx_figura = 1;
-    else if (key == GLFW_KEY_2 && action == GLFW_PRESS) idx_figura = 2;
-    else if (key == GLFW_KEY_3 && action == GLFW_PRESS) idx_figura = 3;
-
-    //Traslaciones
-    else if (key == GLFW_KEY_W && action == GLFW_PRESS && idx_figura == 1) triangulo.aplicar_traslacion(0.0f, 0.1f, true);
-    else if (key == GLFW_KEY_S && action == GLFW_PRESS && idx_figura == 1) triangulo.aplicar_traslacion(0.0f, -0.1f, true);
-    else if (key == GLFW_KEY_D && action == GLFW_PRESS && idx_figura == 1) triangulo.aplicar_traslacion(0.1f, 0.0f, false);
-    else if (key == GLFW_KEY_A && action == GLFW_PRESS && idx_figura == 1) triangulo.aplicar_traslacion(-0.1f, 0.0f, false);
-
-    else if (key == GLFW_KEY_W && action == GLFW_PRESS && idx_figura == 2) estrella.aplicar_traslacion(0.0f, 0.1f, true);
-    else if (key == GLFW_KEY_S && action == GLFW_PRESS && idx_figura == 2) estrella.aplicar_traslacion(0.0f, -0.1f, true);
-    else if (key == GLFW_KEY_D && action == GLFW_PRESS && idx_figura == 2) estrella.aplicar_traslacion(0.1f, 0.0f, false);
-    else if (key == GLFW_KEY_A && action == GLFW_PRESS && idx_figura == 2) estrella.aplicar_traslacion(-0.1f, 0.0f, false);
-
-    else if (key == GLFW_KEY_W && action == GLFW_PRESS && idx_figura == 3) pizza.aplicar_traslacion(0.0f, 0.1f, true);
-    else if (key == GLFW_KEY_S && action == GLFW_PRESS && idx_figura == 3) pizza.aplicar_traslacion(0.0f, -0.1f, true);
-    else if (key == GLFW_KEY_D && action == GLFW_PRESS && idx_figura == 3) pizza.aplicar_traslacion(0.1f, 0.0f, false);
-    else if (key == GLFW_KEY_A && action == GLFW_PRESS && idx_figura == 3) pizza.aplicar_traslacion(-0.1f, 0.0f, false);
-
-    //Rotaciones
-    else if (key == GLFW_KEY_Q && action == GLFW_PRESS) activar_rotacion = !activar_rotacion;
-
-    //Escala
-    else if (key == GLFW_KEY_E && action == GLFW_PRESS) activar_escala = !activar_escala;    
+    }   
 }

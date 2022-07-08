@@ -1,3 +1,7 @@
+/*
+* Alumno: Julio Ticona Quispe
+* Curso: Computacion Grafica
+*/
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
